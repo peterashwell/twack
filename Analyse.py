@@ -10,10 +10,11 @@ UserWithScore = namedtuple(
 
 class Analyse:
     def __init__(self):
-        dump_glob = os.path.join(
+        self.klass = type(self).__name__
+        dump_path = os.path.join(
             os.environ['TWACK_INFLUENCER_FOLLOWER_DUMP_PATH'], '*.json'
         )
-        self.file_paths = glob.glob(dump_glob)
+        self.file_paths = glob.glob(dump_path)
 
     def compute_user_score(self, user):
         followers = user['followers_count']
@@ -22,6 +23,10 @@ class Analyse:
         return followers / friends
 
     def load_followers(self):
+        print('{0} | loading {1} users'.format(
+            self.klass, len(self.file_paths)
+        ))
+
         followers = []
         for dump_file_path in self.file_paths:
             with open(dump_file_path) as dump_file:
@@ -29,6 +34,11 @@ class Analyse:
                 user = blob['user']
                 score = self.compute_user_score(user)
                 followers.append(UserWithScore(user, score))
+
+        print('{0} | done loading'.format(
+            len(self.file_paths)
+        ))
+
         return followers
 
     def sort_followers(self, followers):
