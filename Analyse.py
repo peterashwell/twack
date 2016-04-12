@@ -37,13 +37,17 @@ class Analyse:
         )
 
     def get_sorted_followers(self):
-        return self.sort_followers(self.load_followers())
+        followers_with_scores = self.sort_followers(self.load_followers())
+        return list(map(
+            lambda fws: fws.user,
+            followers_with_scores
+        ))
 
 if __name__ == '__main__':
     a = Analyse()
     sorted_followers = a.get_sorted_followers()
     print('total followers:', len(sorted_followers))
-    for us in sorted_followers:
-        print('influencer: {0} {1}'.format(
-            us.user['screen_name'], us.score
+    for user in sorted_followers:
+        print('influencer: {0} ({1}/{2})'.format(
+            user['screen_name'], user['followers_count'], user['friends_count']
         ))
