@@ -20,3 +20,12 @@ Doesn't work great unless people have a reason to follow you, e.g. you are a hot
 ## stack
 
 Uses python, tweepy for the mechanics of the algorithm.
+
+## todo
+
+ - [x] create seed list of big crypto guys
+ - [x] dump list of all followers of seed list
+ - [x] dump list of people already following me
+ - [x] script: follow people in top of influencer list first
+ - [ ] script: unfriend people who aren't following me
+ - [ ] script: follow people at bottom of influencer list (follow-gluttons)
