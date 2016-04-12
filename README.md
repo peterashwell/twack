@@ -5,7 +5,9 @@ Hacking your way to more twitter followers
 
 Follows [roughly this approach](https://mng.lincolnwdaniel.com/how-i-grew-from-300-to-5k-followers-in-just-3-weeks-2436528da845#.hjqoqzvr2)
 
- 1. get list of successful twitterers _T_ you want to emulate e.g. 5-10 people with 5k followers
+Approach is this with awesome acronym SUCFWER
+
+ 1. seed with list of successful twitterers _T_ you want to emulate e.g. 5-10 people with 5k followers
  2. unfollow everyone who isn't following you already
  3. compute list _F_ of followers of guys in _T_, sorted by high ratio of following to followers
  4. follow everyone in _F_ up to twitter for your current follower amount (high follow-follower ratio first)
