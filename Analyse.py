@@ -11,7 +11,7 @@ UserWithScore = namedtuple(
 class Analyse:
     def __init__(self):
         dump_glob = os.path.join(
-            os.environ['TWACK_FOLLOWER_DUMP_PATH'], '*.json'
+            os.environ['TWACK_INFLUENCER_FOLLOWER_DUMP_PATH'], '*.json'
         )
         self.file_paths = glob.glob(dump_glob)
 
