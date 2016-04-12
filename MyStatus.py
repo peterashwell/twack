@@ -41,5 +41,5 @@ class MyStatus:
 
 if __name__ == '__main__':
     status = MyStatus()
-    followers = status.get_my_followers()
-    status.dump_followers()
+    my_follower_ids = status.load_followers()
+    print('I have {0} followers'.format(len(my_follower_ids)))
