@@ -9,7 +9,7 @@ from Auth import tweepy_with_auth
 
 TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS = 60
 TWITTER_FOLLOWERS_API_MAX_COUNT = 200
-TWACK_DUMP_PATH = os.environ['TWACK_FOLLOWER_DUMP_PATH']
+TWACK_DUMP_PATH = os.environ['TWACK_INFLUENCER_FOLLOWER_DUMP_PATH']
 
 for seed_screen_name in seed_screen_names:
     cursor = tweepy.Cursor(
