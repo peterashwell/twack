@@ -67,18 +67,25 @@ class MyStatus:
         return my_friend_ids
 
     def load_follow_backs(self):
-        my_follower_ids = status.load_followers()
-        my_friend_ids = status.load_friends()
+        my_follower_ids = self.load_followers()
+        my_friend_ids = self.load_friends()
         follow_backs = set(my_follower_ids).intersection(my_friend_ids)
-
         return follow_backs
+
+    def load_unfriendly_friends(self):
+        my_friend_ids = self.load_friends()
+        follow_backs = self.load_follow_backs()
+        unfriendly = set(my_friend_ids).difference(follow_backs)
+        return unfriendly
 
 if __name__ == '__main__':
     status = MyStatus()
     my_follower_ids = status.load_followers()
     my_friend_ids = status.load_friends()
     follow_backs = status.load_follow_backs()
+    unfriendly = status.load_unfriendly_friends()
 
-    print('{0} friends, {1} followers, {2} follow-backs'.format(
-        len(my_friend_ids), len(my_follower_ids), len(follow_backs)
+    print('{0} friends, {1} followers, {2} follow-backs, {3} unfriendlies'.format(
+        len(my_friend_ids), len(my_follower_ids), len(follow_backs),
+        len(unfriendly)
     ))
