@@ -1,3 +1,5 @@
+import time
+
 from Auth import tweepy_with_auth
 from Analyse import Analyse
 from MyStatus import MyStatus
@@ -19,3 +21,4 @@ for influencer in influencers:
     if user_id not in my_follower_ids:
         tweepy_with_auth.create_friendship(user_id)
         print('script:follow_influencers | following {0}'.format(influencer['screen_name']))
+        time.sleep(TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS)
