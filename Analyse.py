@@ -20,7 +20,7 @@ class Analyse:
         followers = user['followers_count']
         friends = user['friends_count']
 
-        return followers / friends
+        return friends / followers
 
     def load_followers(self):
         print('{0} | loading {1} users'.format(
