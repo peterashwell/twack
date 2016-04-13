@@ -1,4 +1,3 @@
-
 from Auth import tweepy_with_auth
 from Analyse import Analyse
 from MyStatus import MyStatus
@@ -18,5 +17,5 @@ influencers = analyser.get_sorted_followers()
 for influencer in influencers:
     user_id = influencer['id_str']
     if user_id not in my_follower_ids:
-        print('script:follow_influencers | following {0}'.format(influencer['screen_name']))
         tweepy_with_auth.create_friendship(user_id)
+        print('script:follow_influencers | following {0}'.format(influencer['screen_name']))

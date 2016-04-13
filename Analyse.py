@@ -20,6 +20,8 @@ class Analyse:
         followers = user['followers_count']
         friends = user['friends_count']
 
+        if followers == 0:
+            followers = 1
         return friends / followers
 
     def load_followers(self):
