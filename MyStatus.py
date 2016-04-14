@@ -4,12 +4,16 @@ import time
 import tweepy
 
 from Auth import tweepy_with_auth
+from Meta import seed_screen_names
+from TwackData import TwackTwitterUser, TwackData
 
-
+TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS = 60
 TWITTER_FOLLOWER_IDS_API_REQUEST_SPACING_SECONDS = 60
 TWITTER_FRIENDS_IDS_API_REQUEST_SPACING_SECONDS = 60
+
 TWITTER_FOLLOWER_IDS_API_MAX_COUNT = 5000
 TWITTER_FRIENDS_IDS_API_MAX_COUNT = 5000
+TWITTER_FOLLOWERS_API_MAX_COUNT = 200
 
 
 class MyStatus:
@@ -17,6 +21,33 @@ class MyStatus:
         self.my_screen_name = os.environ['TWACK_MY_TWITTER_SCREEN_NAME']
         self.my_followers_path = os.environ['TWACK_MY_FOLLOWER_IDS_PATH']
         self.my_friends_path = os.environ['TWACK_MY_FRIEND_IDS_PATH']
+
+        self.twack_data = TwackData()
+
+    def dump_seed_followers(self):
+        follower_of_screen_name = []
+        for seed_screen_name in seed_screen_names:
+            cursor = tweepy.Cursor(
+                tweepy_with_auth.followers,
+                screen_name=seed_screen_name,
+                count=TWITTER_FOLLOWERS_API_MAX_COUNT
+            )
+
+            for page in cursor.pages()[:1]:
+                for user in page:
+                    twack_twitter_user = TwackTwitterUser(
+                        user.id_str,
+                        user.screen_name,
+                        user.followers_count,
+                        user.friends_count,
+                        user._json
+                    )
+                    self.twack_data.add_twack_twitter_user(twack_twitter_user)
+                    # Change to add as follower
+                    follower_of_screen_name.append(
+                        (user.id_str, seed_screen_name)
+                    )
+                time.sleep(TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS)
 
     def get_my_followers(self):
         my_follower_ids = []
