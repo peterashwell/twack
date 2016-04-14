@@ -5,7 +5,7 @@ from collections import namedtuple
 
 TwackTwitterUser = namedtuple(
     'TwackTwitterUser',
-    'id, user_id, screen_name, followers_count, friends_count, blob'
+    'user_id, screen_name, followers_count, friends_count, blob'
 )
 
 

@@ -21,10 +21,10 @@ create table follow_attempts (
 
 create table my_followers (
 	id integer primary_key,
-	user_id integer,
+	user_id integer
 );
 
 create table my_friends (
 	id integer primary_key,
-	user_id integer,
+	user_id integer
 );
