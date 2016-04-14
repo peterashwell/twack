@@ -27,5 +27,12 @@ Uses python, tweepy for the mechanics of the algorithm.
  - [x] dump list of all followers of seed list
  - [x] dump list of people already following me
  - [x] script: follow people in top of influencer list first
- - [ ] script: unfriend people who aren't following me
- - [ ] script: follow people at bottom of influencer list (follow-gluttons)
+ - [x] script: unfriend people who aren't following me
+ - [x] script: follow people at bottom of influencer list (follow-gluttons)
+ - [ ] strategy: change dump seed list to database for more flexible analysis
+ - [ ] strategy: use 'most seed members followed' first
+ - [ ] strategy: 'conservative', e.g. limit friend / follow ratio when adding loads
+ - [ ] strategy: random selection of who to follow
+ - [ ] strategy: using db to track when I try to add people
+ - [ ] strategy: last friended first
+ - [ ] automation: automate loop of unfriend / friend with alerts for failures
