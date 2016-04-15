@@ -28,6 +28,19 @@ class TwackData:
     def add_twitter_user_list_as_followers(self):
         pass
 
+    def add_follower_of_screen_name(self, twack_twitter_user, screen_name):
+        """Add a follower relationship with screen_name
+        """
+        query = '''
+            insert into seed_followers
+            (user_id, follower_of_screen_name)
+            values (?, ?)
+        '''
+
+        cursor = self.db.cursor()
+        cursor.execute(query, (twack_twitter_user.user_id, screen_name))
+        self.db.commit()
+
     def add_twack_twitter_user(self, twack_twitter_user):
         """Add a single twack_twitter_user
         """
@@ -125,3 +138,5 @@ if __name__ == '__main__':
     twd.add_twack_twitter_user(some_user)
     twd.remove_twack_twitter_user(some_user)
     twd.add_twack_twitter_user(some_user)
+
+    twd.add_follower_of_screen_name(some_user, 'crypto_god')
