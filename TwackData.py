@@ -16,6 +16,26 @@ class TwackData:
     def add_follow_attempt(self, twack_twitter_user):
         pass
 
+    def load_my_friends(self):
+        query = '''
+            select tu.user_id, tu.screen_name, tu.followers_count,
+            tu.friends_count, tu.blob
+            from twitter_user tu
+            inner join my_friends mf on tu.user_id = mf.user_id
+        '''
+        results = self.db.cursor().execute(query).fetchall()
+        return list(map(TwackTwitterUser._make, results))
+
+    def load_my_followers(self):
+        query = '''
+            select tu.user_id, tu.screen_name, tu.followers_count,
+            tu.friends_count, tu.blob
+            from twitter_user tu
+            inner join my_followers mf on tu.user_id = mf.user_id
+        '''
+        results = self.db.cursor().execute(query).fetchall()
+        return list(map(TwackTwitterUser._make, results))
+
     def delete_all_my_followers(self):
         """Delete everything from my_followers table
         """
@@ -34,7 +54,7 @@ class TwackData:
         self.db.cursor().execute(query)
         self.db.commit()
 
-    def add_my_follower_with_user_id(self, user_id):
+    def add_my_follower(self, user):
         """Add a twack twitter user as a follower of mine
         """
         query = '''
@@ -44,11 +64,11 @@ class TwackData:
         '''
 
         self.db.cursor().execute(
-            query, (user_id,)
+            query, (user.user_id,)
         )
         self.db.commit()
 
-    def add_my_friend_with_user_id(self, user_id):
+    def add_my_friend(self, user):
         """Add a twack twitter user as a friend of mine
         """
         query = '''
@@ -57,7 +77,7 @@ class TwackData:
         '''
 
         self.db.cursor().execute(
-            query, (user_id,)
+            query, (user.user_id,)
         )
         self.db.commit()
 

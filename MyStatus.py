@@ -9,11 +9,10 @@ from Meta import seed_screen_names
 from TwackData import TwackTwitterUser, TwackData
 
 TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS = 60
-TWITTER_FOLLOWER_IDS_API_REQUEST_SPACING_SECONDS = 60
-TWITTER_FRIENDS_IDS_API_REQUEST_SPACING_SECONDS = 60
+TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS = 60
+TWITTER_FRIENDS_API_REQUEST_SPACING_SECONDS = 60
 
-TWITTER_FOLLOWER_IDS_API_MAX_COUNT = 5000
-TWITTER_FRIENDS_IDS_API_MAX_COUNT = 5000
+TWITTER_FRIENDS_API_MAX_COUNT = 200
 TWITTER_FOLLOWERS_API_MAX_COUNT = 200
 
 
@@ -25,6 +24,15 @@ class MyStatus:
 
         self.twack_data = TwackData()
 
+    def tweepy_user_to_twack_user(self, user):
+        return TwackTwitterUser(
+            user.id_str,
+            user.screen_name,
+            user.followers_count,
+            user.friends_count,
+            json.dumps(user._json)
+        )
+
     def dump_seed_followers(self):
         for seed_screen_name in seed_screen_names:
             cursor = tweepy.Cursor(
@@ -35,13 +43,7 @@ class MyStatus:
 
             for page in cursor.pages():
                 for user in page:
-                    twack_twitter_user = TwackTwitterUser(
-                        user.id_str,
-                        user.screen_name,
-                        user.followers_count,
-                        user.friends_count,
-                        json.dumps(user._json)
-                    )
+                    twack_twitter_user = self.tweepy_user_to_twack_user(user)
                     self.twack_data.add_twack_twitter_user(twack_twitter_user)
                     self.twack_data.add_follower_of_screen_name(
                         twack_twitter_user, seed_screen_name
@@ -52,68 +54,50 @@ class MyStatus:
         self.twack_data.delete_all_my_followers()
 
         cursor = tweepy.Cursor(
-            tweepy_with_auth.followers_ids,
+            tweepy_with_auth.followers,
             screen_name=self.my_screen_name,
-            count=TWITTER_FOLLOWER_IDS_API_MAX_COUNT
+            count=TWITTER_FOLLOWERS_API_MAX_COUNT
         )
         for page in cursor.pages():
-            for user_id in page:
-                self.twack_data.add_my_follower_with_user_id(user_id)
-            time.sleep(TWITTER_FOLLOWER_IDS_API_REQUEST_SPACING_SECONDS)
+            for user in page:
+                twack_twitter_user = self.tweepy_user_to_twack_user(user)
+                self.twack_data.add_twack_twitter_user(twack_twitter_user)
+                self.twack_data.add_my_follower(twack_twitter_user)
+            time.sleep(TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS)
 
     def dump_my_friends(self):
         self.twack_data.delete_all_my_friends()
 
         cursor = tweepy.Cursor(
-            tweepy_with_auth.friends_ids,
+            tweepy_with_auth.friends,
             screen_name=self.my_screen_name,
-            count=TWITTER_FRIENDS_IDS_API_MAX_COUNT
+            count=TWITTER_FRIENDS_API_MAX_COUNT
         )
         for page in cursor.pages():
-            for user_id in page:
-                self.twack_data.add_my_friend_with_user_id(user_id)
-            time.sleep(TWITTER_FRIENDS_IDS_API_REQUEST_SPACING_SECONDS)
+            for user in page:
+                twack_twitter_user = self.tweepy_user_to_twack_user(user)
+                self.twack_data.add_twack_twitter_user(twack_twitter_user)
+                self.twack_data.add_my_friend(twack_twitter_user)
+            time.sleep(TWITTER_FRIENDS_API_REQUEST_SPACING_SECONDS)
 
-    def dump_followers(self):
-        follower_ids = self.get_my_followers()
-        with open(self.my_followers_path, 'w') as my_followers_file:
-            my_followers_file.write('\n'.join(follower_ids))
+    def find_unfriendly_friends(self):
+        my_followers = self.twack_data.load_my_followers()
+        my_friends = self.twack_data.load_my_friends()
 
-    def load_followers(self):
-        with open(self.my_followers_path) as my_followers_file:
-            my_follower_ids = my_followers_file.read().strip().split('\n')
-        return my_follower_ids
+        my_followers_ids = {f.user_id for f in my_followers}
+        my_friends_ids = {f.user_id for f in my_friends}
 
-    def dump_friends(self):
-        friend_ids = self.get_my_friends()
-        with open(self.my_friends_path, 'w') as my_friends_file:
-            my_friends_file.write('\n'.join(friend_ids))
-
-    def load_friends(self):
-        with open(self.my_friends_path) as my_friends_file:
-            my_friend_ids = my_friends_file.read().strip().split('\n')
-        return my_friend_ids
-
-    def load_follow_backs(self):
-        my_follower_ids = self.load_followers()
-        my_friend_ids = self.load_friends()
-        follow_backs = set(my_follower_ids).intersection(my_friend_ids)
-        return follow_backs
-
-    def load_unfriendly_friends(self):
-        my_friend_ids = self.load_friends()
-        follow_backs = self.load_follow_backs()
-        unfriendly = set(my_friend_ids).difference(follow_backs)
+        unfriendly = my_friends_ids.difference(my_followers_ids)
         return unfriendly
 
 if __name__ == '__main__':
     status = MyStatus()
-    my_follower_ids = status.load_followers()
-    my_friend_ids = status.load_friends()
-    follow_backs = status.load_follow_backs()
-    unfriendly = status.load_unfriendly_friends()
+    tw = TwackData()
 
-    print('{0} friends, {1} followers, {2} follow-backs, {3} unfriendlies'.format(
-        len(my_friend_ids), len(my_follower_ids), len(follow_backs),
-        len(unfriendly)
+    my_followers = tw.load_my_followers()
+    my_friends = tw.load_my_friends()
+    unfriendly = status.find_unfriendly_friends()
+
+    print('{0} friends, {1} followers, {2} unfriendlies'.format(
+        len(my_friends), len(my_followers), len(unfriendly)
     ))
