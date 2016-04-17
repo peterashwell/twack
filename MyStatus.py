@@ -47,33 +47,27 @@ class MyStatus:
                     )
                 time.sleep(TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS)
 
-    def get_my_followers(self):
-        my_follower_ids = []
-
+    def dump_my_followers(self):
         cursor = tweepy.Cursor(
             tweepy_with_auth.followers_ids,
             screen_name=self.my_screen_name,
             count=TWITTER_FOLLOWER_IDS_API_MAX_COUNT
         )
         for page in cursor.pages():
-            my_follower_ids.extend(page)
+            for user_id in my_follower_ids:
+                self.twack_data.add_my_follower_with_user_id(user_id)
             time.sleep(TWITTER_FOLLOWER_IDS_API_REQUEST_SPACING_SECONDS)
 
-        return list(map(str, my_follower_ids))
-
-    def get_my_friends(self):
-        my_friend_ids = []
-
+    def dump_my_friends(self):
         cursor = tweepy.Cursor(
             tweepy_with_auth.friends_ids,
             screen_name=self.my_screen_name,
             count=TWITTER_FRIENDS_IDS_API_MAX_COUNT
         )
         for page in cursor.pages():
-            my_friend_ids.extend(page)
+            for user_id in page:
+                self.twack_data.add_my_friend_with_user_id(user_id)
             time.sleep(TWITTER_FRIENDS_IDS_API_REQUEST_SPACING_SECONDS)
-
-        return list(map(str, my_friend_ids))
 
     def dump_followers(self):
         follower_ids = self.get_my_followers()
