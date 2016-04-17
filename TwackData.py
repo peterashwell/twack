@@ -64,8 +64,12 @@ class TwackData:
     def add_follower_of_screen_name(self, twack_twitter_user, screen_name):
         """Add a follower relationship with screen_name
         """
+        print('adding {0} as follower of {1}'.format(
+            twack_twitter_user.screen_name, screen_name
+        ))
+
         query = '''
-            insert into seed_followers
+            insert on conflict ignore into seed_followers
             (user_id, follower_of_screen_name)
             values (?, ?)
         '''
@@ -79,8 +83,10 @@ class TwackData:
         """Add a single twack_twitter_user
         """
 
+        print('adding twitter user {0}'.format(twack_twitter_user.screen_name))
+
         query = '''
-            insert into twitter_user
+            insert on conflict ignore into twitter_user
             (id, user_id, screen_name, followers_count,
             friends_count, blob)
             values (?, ?, ?, ?, ?, ?)
@@ -89,6 +95,7 @@ class TwackData:
         # Pad with None for primary key field
         twack_twitter_user = [None] + list(twack_twitter_user)
 
+        print('twack_twitter_user {0}'.format(twack_twitter_user))
         cursor = self.db.cursor()
         cursor.execute(query, twack_twitter_user)
         self.db.commit()
