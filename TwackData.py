@@ -13,20 +13,53 @@ class TwackData:
     def __init__(self):
         self.db = sqlite3.connect(os.environ['TWACK_DB_PATH'])
 
-    def add_user(self, twack_twitter_user):
-        pass
-
     def add_follow_attempt(self, twack_twitter_user):
         pass
 
-    def add_seed_follower(self, twack_twitter_user, follower_of_screen_name):
-        pass
+    def delete_all_my_followers(self):
+        """Delete everything from my_followers table
+        """
+        query = '''
+            delete from my_followers
+        '''
+        self.db.cursor().execute(query)
+        self.db.commit()
 
-    def get_all_my_followers(self):
-        pass
+    def delete_all_my_friends(self):
+        """Delete everything from my_friends table
+        """
+        query = '''
+            delete from my_friends
+        '''
+        self.db.cursor().execute(query)
+        self.db.commit()
 
-    def add_twitter_user_list_as_followers(self):
-        pass
+    def add_my_follower_with_user_id(self, user_id):
+        """Add a twack twitter user as a follower of mine
+        """
+        query = '''
+            insert into my_followers
+            (user_id)
+            values (?)
+        '''
+
+        self.db.cursor().execute(
+            query, (user_id,)
+        )
+        self.db.commit()
+
+    def add_my_friend_with_user_id(self, user_id):
+        """Add a twack twitter user as a friend of mine
+        """
+        query = '''
+            insert into my_friends
+            (user_id) values (?)
+        '''
+
+        self.db.cursor().execute(
+            query, (user_id,)
+        )
+        self.db.commit()
 
     def add_follower_of_screen_name(self, twack_twitter_user, screen_name):
         """Add a follower relationship with screen_name
@@ -71,18 +104,6 @@ class TwackData:
         cursor = self.db.cursor()
         cursor.execute(query, (twack_twitter_user.user_id,))
         self.db.commit()
-
-    def clear_all_followers(self):
-        pass
-
-    def get_all_my_friends(self):
-        pass
-
-    def add_my_friends(self, twack_twitter_users):
-        pass
-
-    def clear_all_friends(self):
-        pass
 
 if __name__ == '__main__':
     twd = TwackData()
