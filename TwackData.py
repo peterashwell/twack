@@ -37,8 +37,9 @@ class TwackData:
             values (?, ?)
         '''
 
-        cursor = self.db.cursor()
-        cursor.execute(query, (twack_twitter_user.user_id, screen_name))
+        self.db.cursor().execute(
+            query, (twack_twitter_user.user_id, screen_name)
+        )
         self.db.commit()
 
     def add_twack_twitter_user(self, twack_twitter_user):
@@ -70,46 +71,6 @@ class TwackData:
         cursor = self.db.cursor()
         cursor.execute(query, (twack_twitter_user.user_id,))
         self.db.commit()
-
-    def add_twack_twitter_users(self, twack_twitter_users):
-        """Add every twack_twitter_user in the given list
-        """
-
-        query = '''
-            insert into twitter_user
-            (id, user_id, screen_name, followers_count,
-            friends_count, blob)
-            values (?, ?, ?, ?, ?, ?)
-        '''
-        users_padded_for_primary_keys = [
-            [None] + list(user) for user in twack_twitter_users
-        ]
-
-        cursor = self.db.cursor()
-        cursor.executemany(query, users_padded_for_primary_keys)
-        self.db.commit()
-
-    def remove_twack_twitter_users(self, twack_twitter_users):
-        """Remove every twitter user from the given list
-        """
-        query_params = '({0})'.format(
-            ','.join('?' * len(twack_twitter_users))
-        )
-
-        query = '''
-            delete from twitter_user
-            where user_id in
-        ''' + query_params
-        user_ids = [user.user_id for user in twack_twitter_users]
-
-        cursor = self.db.cursor()
-        cursor.execute(query, user_ids)
-        self.db.commit()
-
-    def add_follower_of(self, user_id, follower_of_screen_name):
-        """Add a row specifying user_id is a follower of screen name
-        """
-        pass
 
     def clear_all_followers(self):
         pass
