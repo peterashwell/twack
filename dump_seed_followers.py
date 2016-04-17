@@ -8,5 +8,8 @@ sys.stderr = sys.stdout
 from MyStatus import MyStatus
 from Auth import tweepy_with_auth
 
+td = TwackData()
 status = MyStatus()
+
+td.delete_all_seed_followers()
 status.dump_seed_followers()

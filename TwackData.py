@@ -117,6 +117,17 @@ class TwackData:
         )
         self.db.commit()
 
+    def delete_all_seed_followers(self):
+        """Remove every seed follower
+        """
+
+        query = '''
+            delete from seed_followers
+        '''
+
+        self.db.cursor().execute(query)
+        self.db.commit()
+
     def add_twack_twitter_user(self, twack_twitter_user):
         """Add a single twack_twitter_user
         """
