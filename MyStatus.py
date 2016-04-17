@@ -25,7 +25,6 @@ class MyStatus:
         self.twack_data = TwackData()
 
     def dump_seed_followers(self):
-        follower_of_screen_name = []
         for seed_screen_name in seed_screen_names:
             cursor = tweepy.Cursor(
                 tweepy_with_auth.followers,
@@ -43,9 +42,8 @@ class MyStatus:
                         user._json
                     )
                     self.twack_data.add_twack_twitter_user(twack_twitter_user)
-                    # Change to add as follower
-                    follower_of_screen_name.append(
-                        (user.id_str, seed_screen_name)
+                    self.twack_data.add_follower_of_screen_name(
+                        user.id_str, seed_screen_name
                     )
                 time.sleep(TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS)
 
