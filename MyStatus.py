@@ -48,6 +48,8 @@ class MyStatus:
                 time.sleep(TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS)
 
     def dump_my_followers(self):
+        self.twack_data.delete_all_my_followers()
+
         cursor = tweepy.Cursor(
             tweepy_with_auth.followers_ids,
             screen_name=self.my_screen_name,
@@ -59,6 +61,8 @@ class MyStatus:
             time.sleep(TWITTER_FOLLOWER_IDS_API_REQUEST_SPACING_SECONDS)
 
     def dump_my_friends(self):
+        self.twack_data.delete_all_my_friends()
+
         cursor = tweepy.Cursor(
             tweepy_with_auth.friends_ids,
             screen_name=self.my_screen_name,
