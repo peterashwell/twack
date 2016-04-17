@@ -1,3 +1,7 @@
+import sys
+
+sys.stderr = sys.stdout
+
 # Go through list of all my friends
 # Unfriend those that do not follow me
 

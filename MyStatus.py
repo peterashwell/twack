@@ -57,7 +57,7 @@ class MyStatus:
             count=TWITTER_FOLLOWER_IDS_API_MAX_COUNT
         )
         for page in cursor.pages():
-            for user_id in my_follower_ids:
+            for user_id in page:
                 self.twack_data.add_my_follower_with_user_id(user_id)
             time.sleep(TWITTER_FOLLOWER_IDS_API_REQUEST_SPACING_SECONDS)
 

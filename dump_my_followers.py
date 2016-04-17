@@ -1,4 +1,8 @@
+import sys
+
+sys.stderr = sys.stdout
+
 from MyStatus import MyStatus
 
 status = MyStatus()
-status.dump_followers()
+status.dump_my_followers()
