@@ -16,6 +16,24 @@ class TwackData:
     def add_follow_attempt(self, twack_twitter_user):
         pass
 
+    def seed_followers_by_sum_seeds_followed(self):
+        query = '''
+            select tu.user_id, tu.screen_name, tu.followers_count,
+            tu.friends_count, tu.blob, count(sf.follower_of_screen_name) as seed_count
+            from seed_followers sf
+            inner join twitter_user tu
+            on tu.user_id = sf.user_id
+            group by sf.user_id
+        '''
+        results = self.db.cursor().execute(query).fetchall()
+        packed_results = []
+        for r in results:
+            user_slice = r[:-1]
+            seed_count = r[-1]
+            user = TwackTwitterUser._make(user_slice)
+            packed_results.append((user, seed_count))
+        return packed_results
+
     def load_my_friends(self):
         query = '''
             select tu.user_id, tu.screen_name, tu.followers_count,
@@ -140,12 +158,16 @@ if __name__ == '__main__':
     )
     some_list = [some_user]
 
-    twd.add_twack_twitter_users(some_list)
-    twd.remove_twack_twitter_users(some_list)
-    twd.add_twack_twitter_users(some_list)
-
     twd.add_twack_twitter_user(some_user)
     twd.remove_twack_twitter_user(some_user)
     twd.add_twack_twitter_user(some_user)
 
     twd.add_follower_of_screen_name(some_user, 'crypto_god')
+
+    seed_counts = sorted(
+        twd.seed_followers_by_sum_seeds_followed(),
+        key=lambda sc: sc[1],
+        reverse=False
+    )
+    for sc in seed_counts:
+        print(sc[0].screen_name, sc[1])

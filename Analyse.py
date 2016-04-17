@@ -3,6 +3,8 @@ import glob
 import json
 import os
 
+from TwackData import TwackData
+
 UserWithScore = namedtuple(
     'FollowerWithScore', 'user, score'
 )
@@ -15,6 +17,7 @@ class Analyse:
             os.environ['TWACK_INFLUENCER_FOLLOWER_DUMP_PATH'], '*.json'
         )
         self.file_paths = glob.glob(dump_path)
+        self.twack_data = TwackData()
 
     def compute_user_score(self, user):
         followers = user['followers_count']
@@ -23,6 +26,9 @@ class Analyse:
         if followers == 0:
             followers = 1
         return friends / followers
+
+    def who_to_follow_by_seed_density(self):
+        pass
 
     def load_followers(self):
         print('{0} | loading {1} users'.format(
