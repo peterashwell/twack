@@ -69,7 +69,7 @@ class TwackData:
         ))
 
         query = '''
-            insert on conflict ignore into seed_followers
+            insert into seed_followers
             (user_id, follower_of_screen_name)
             values (?, ?)
         '''
@@ -86,7 +86,7 @@ class TwackData:
         print('adding twitter user {0}'.format(twack_twitter_user.screen_name))
 
         query = '''
-            insert on conflict ignore into twitter_user
+            insert into twitter_user
             (id, user_id, screen_name, followers_count,
             friends_count, blob)
             values (?, ?, ?, ?, ?, ?)
