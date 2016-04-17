@@ -1,3 +1,4 @@
+import json
 import os
 import time
 
@@ -32,18 +33,18 @@ class MyStatus:
                 count=TWITTER_FOLLOWERS_API_MAX_COUNT
             )
 
-            for page in cursor.pages()[:1]:
+            for page in cursor.pages():
                 for user in page:
                     twack_twitter_user = TwackTwitterUser(
                         user.id_str,
                         user.screen_name,
                         user.followers_count,
                         user.friends_count,
-                        user._json
+                        json.dumps(user._json)
                     )
                     self.twack_data.add_twack_twitter_user(twack_twitter_user)
                     self.twack_data.add_follower_of_screen_name(
-                        user.id_str, seed_screen_name
+                        twack_twitter_user, seed_screen_name
                     )
                 time.sleep(TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS)
 
