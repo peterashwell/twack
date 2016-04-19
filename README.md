@@ -29,12 +29,13 @@ Uses python, tweepy for the mechanics of the algorithm.
  - [x] script: follow people in top of influencer list first
  - [x] script: unfriend people who aren't following me
  - [x] script: follow people at bottom of influencer list (follow-gluttons)
- - [ ] dbify: add single twack user
- - [ ] dbify: follower of screen name (single)
- - [ ] strategy: change dump seed list to database for more flexible analysis
- - [ ] strategy: use 'most seed members followed' first
+ - [x] dbify: add single twack user
+ - [x] dbify: follower of screen name (single)
+ - [x] strategy: change dump seed list to database for more flexible analysis
+ - [x] strategy: use 'most seed members followed' first
+ - [ ] dbify: using db to track when I try to add people
+ - [ ] strategy: friend last tweet
+ - [ ] automation: automate loop of unfriend / friend with alerts for failures
  - [ ] strategy: 'conservative', e.g. limit friend / follow ratio when adding loads
  - [ ] strategy: random selection of who to follow
- - [ ] strategy: using db to track when I try to add people
  - [ ] strategy: last friended first
- - [ ] automation: automate loop of unfriend / friend with alerts for failures
