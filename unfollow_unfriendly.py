@@ -5,7 +5,9 @@ from MyStatus import MyStatus
 from Auth import tweepy_with_auth
 
 status = MyStatus()
-unfriendly = status.load_unfriendly_friends()
+unfriendly = status.find_unfriendly_friends()
+
+print('script:unfollow_unfriendly | Unfriending {0} friends'.format(len(unfriendly)))
 
 for user_id in unfriendly:
     user = tweepy_with_auth.destroy_friendship(

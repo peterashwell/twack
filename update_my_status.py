@@ -5,5 +5,5 @@ sys.stderr = sys.stdout
 from MyStatus import MyStatus
 
 status = MyStatus()
-status.dump_my_friends()
 status.dump_my_followers()
+status.dump_my_friends()

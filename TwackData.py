@@ -16,7 +16,7 @@ class TwackData:
     def add_follow_attempt(self, twack_twitter_user):
         pass
 
-    def seed_followers_by_sum_followed(self):
+    def seed_followers_by_sum_followed_with_score(self):
         query = '''
             select tu.user_id, tu.screen_name, tu.followers_count,
             tu.friends_count, tu.blob, count(sf.follower_of_screen_name) as seed_count
@@ -24,6 +24,7 @@ class TwackData:
             inner join twitter_user tu
             on tu.user_id = sf.user_id
             group by sf.user_id
+            having seed_count > 1
             order by seed_count desc
         '''
         results = self.db.cursor().execute(query).fetchall()
@@ -34,6 +35,10 @@ class TwackData:
             user = TwackTwitterUser._make(user_slice)
             packed_results.append((user, seed_count))
         return packed_results
+
+    def seed_followers_by_sum_followed(self):
+        with_score = self.seed_followers_by_sum_followed_with_score()
+        return list(map(lambda f: f[0], with_score))
 
     def load_my_friends(self):
         query = '''
@@ -145,7 +150,6 @@ class TwackData:
         # Pad with None for primary key field
         twack_twitter_user = [None] + list(twack_twitter_user)
 
-        print('twack_twitter_user {0}'.format(twack_twitter_user))
         cursor = self.db.cursor()
         cursor.execute(query, twack_twitter_user)
         self.db.commit()
