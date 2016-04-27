@@ -15,7 +15,7 @@ class Analyse:
         self.klass = type(self).__name__
         self.twack_data = TwackData()
 
-    def good_candidates_not_already_following(self):
+    def good_candidates_not_following_me(self):
         seed_followers = self.twack_data.seed_followers_by_sum_followed()
         print('{0} | loading {1} users'.format(
             self.klass, len(seed_followers)
@@ -30,7 +30,7 @@ class Analyse:
 
 if __name__ == '__main__':
     a = Analyse()
-    sorted_followers = a.good_candidates_not_already_following()
+    sorted_followers = a.good_candidates_not_following_me()
     print('total candidates:', len(sorted_followers))
     for user in sorted_followers:
         print('candidate: {0}'.format(
