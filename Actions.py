@@ -17,6 +17,14 @@ class Actions:
         self.analyser = Analyse()
         pass
 
+    def score_tweets(self, tweets):
+        """Return the highest scoring tweet from tweets
+
+        Scores are points by: retweets 3 points, likes 1
+        """
+        if len(tweets) == 0:
+            return None
+
     def gain_followers_like_strategy(self):
         """Gain followers by liking statuses of good candidates
 
@@ -27,7 +35,14 @@ class Actions:
 
         Stop at NUMBER_TO_LIKE amount
         """
-        pass
+        candidates = self.analyser.good_candidates_not_following_me()
+
+        # Go through each candidate
+        for c in candidates:
+            # Get their tweets
+            tweets = tweepy_with_auth.user_timeline(c.user_id)
+            print(tweets[0])
+            return
 
     def gain_followers_friends_strategy(self):
         """Gain followers by friending people who are likely to follow back
