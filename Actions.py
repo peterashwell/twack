@@ -40,14 +40,19 @@ class Actions:
 
         return tweets[0]
 
-    def unfavorite_all_tweets_i_like(self):
+    def destroy_all_favorites(self):
         # Dump already liked tweets
         already_liked_tweets = tweepy_with_auth.favorites()
         for liked_tweet in already_liked_tweets:
-            print('Actions | unlike tweet by {0}'.format(
-                liked_tweet.user.screen_name
-            ))
-            tweepy_with_auth.destroy_favorite(liked_tweet.id)
+            try:
+                print('Actions | unlike tweet by {0}'.format(
+                    liked_tweet.user.screen_name
+                ))
+                tweepy_with_auth.destroy_favorite(liked_tweet.id)
+            except TweepError as e:
+                print(e)
+            except Exception:
+                raise
 
     def gain_followers_like_strategy(self):
         """Gain followers by liking statuses of good candidates
@@ -59,6 +64,8 @@ class Actions:
 
         Stop at NUMBER_TO_LIKE amount
         """
+        self.destroy_all_favorites()
+        
         # Go through each candidate from people I'm not following
         candidates = self.analyser.good_candidates_not_following_me()
         already_liked_tweet_ids = {
@@ -78,7 +85,7 @@ class Actions:
                 # Find the 'best' by number of retweets and likes
                 best = self._get_best_tweet_to_like(tweets)
                 # Skip this user if we already liked their best tweet
-                if best.id in already_liked_tweet_ids:
+                if best is None or best.id in already_liked_tweet_ids:
                     continue
                 print('Actions | like tweet by {0} - {1} rt {2} <3'.format(
                     best.user.screen_name, best.retweet_count, best.favorite_count
