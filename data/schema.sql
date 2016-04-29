@@ -15,10 +15,17 @@ create table seed_followers (
     unique(user_id, follower_of_screen_name) on conflict ignore
 );
 
-create table follow_attempts (
+create table friend_attempt (
     id integer primary key,
     user_id integer,
-    attempt_date string
+    timestamp string default now
+);
+
+create table favorite_attempt (
+	id integer primary key,
+	user_id integer,
+	tweet_id_favorited integer,
+	timestamp string default now
 );
 
 create table my_followers (

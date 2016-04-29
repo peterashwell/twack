@@ -13,8 +13,31 @@ class TwackData:
     def __init__(self):
         self.db = sqlite3.connect(os.environ['TWACK_DB_PATH'])
 
-    def add_follow_attempt(self, twack_twitter_user):
-        pass
+    def add_friend_attempt(self, user_id):
+        """Store an attempt to gain a follower by friending them
+        """
+        query = '''
+            insert into friend_attempt
+            (user_id)
+            values (?, ?)
+        '''
+
+        self.db.cursor().execute(
+            query, (user_id,)
+        )
+        self.db.commit()
+
+    def add_favorite_attempt(self, user_id, tweet_id_favorited):
+        query = '''
+            insert into favorite_attempt
+            (user_id, screen_name, tweet_id_favorited)
+            values (?, ?, ?)
+        '''
+
+        self.db.cursor().execute(
+            query, (user_id, tweet_id_favorited)
+        )
+        self.db.commit()
 
     def seed_followers_by_sum_followed_with_score(self):
         query = '''
