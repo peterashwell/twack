@@ -11,7 +11,7 @@ class Actions:
     TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS = 10
     TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS = 100
     NUMBER_TO_FOLLOW = 100
-    NUMBER_OF_TWEETS_TO_LIKE = 200
+    NUMBER_OF_TWEETS_TO_LIKE = 1000
 
     def __init__(self):
         self.twack_data = TwackData()
@@ -67,7 +67,7 @@ class Actions:
         self.destroy_all_favorites()
         
         # Go through each candidate from people I'm not following
-        candidates = self.analyser.good_candidates_not_following_me()
+        candidates = self.analyser.good_candidates_not_following_me_last_liked_first()
         already_liked_tweet_ids = {
             t.id for t in tweepy_with_auth.favorites()
         }
@@ -93,6 +93,9 @@ class Actions:
 
                 # Like the tweet. Ignore tweepy errors, but not real ones
                 tweepy_with_auth.create_favorite(best.id)
+                self.twack_data.add_favorite_attempt(
+                    best.user.id, best.id
+                )
                 liked_tweet_count += 1
                 time.sleep(
                     self.TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS
@@ -126,6 +129,7 @@ class Actions:
             screen_name = candidate.screen_name
             try:
                 tweepy_with_auth.create_friendship(user_id)
+                self.twack_data.add_friend_attempt(user_id)
                 print('Actions | following {0}'.format(screen_name))
                 time.sleep(
                     self.TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS

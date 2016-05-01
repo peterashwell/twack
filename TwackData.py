@@ -8,6 +8,11 @@ TwackTwitterUser = namedtuple(
     'user_id, screen_name, followers_count, friends_count, blob'
 )
 
+TwackTwitterUserWithFavoriteCount = namedtuple(
+    'TwackTwitterUser',
+    'user_id, screen_name, followers_count, friends_count, blob, favorite_count'
+)
+
 
 class TwackData:
     def __init__(self):
@@ -30,8 +35,8 @@ class TwackData:
     def add_favorite_attempt(self, user_id, tweet_id_favorited):
         query = '''
             insert into favorite_attempt
-            (user_id, screen_name, tweet_id_favorited)
-            values (?, ?, ?)
+            (user_id, tweet_id_favorited)
+            values (?, ?)
         '''
 
         self.db.cursor().execute(
@@ -39,35 +44,53 @@ class TwackData:
         )
         self.db.commit()
 
-    def seed_followers_by_sum_followed_with_score(self):
+    def seed_followers_by_sum_followed_with_score(self, sort_by_favorites=False):
         query = '''
             select tu.user_id, tu.screen_name, tu.followers_count,
-            tu.friends_count, tu.blob, count(sf.follower_of_screen_name) as seed_count
+            tu.friends_count, tu.blob, count(distinct fa.id) as favorite_count,
+            count(sf.follower_of_screen_name) as seed_count
+
             from seed_followers sf
+
             inner join twitter_user tu
             on tu.user_id = sf.user_id
+            left outer join favorite_attempt fa
+            on fa.user_id = tu.user_id
+
             group by sf.user_id
             having seed_count > 1
-            order by seed_count desc
+
         '''
+        order_by = "order by seed_count desc"
+        if sort_by_favorites:
+            order_by = "order by favorite_count asc, seed_count desc"
+
+        query += order_by
+
         results = self.db.cursor().execute(query).fetchall()
         packed_results = []
         for r in results:
             user_slice = r[:-1]
             seed_count = r[-1]
-            user = TwackTwitterUser._make(user_slice)
+            user = TwackTwitterUserWithFavoriteCount._make(user_slice)
             packed_results.append((user, seed_count))
         return packed_results
 
-    def seed_followers_by_sum_followed(self):
-        with_score = self.seed_followers_by_sum_followed_with_score()
-        return list(map(lambda f: f[0], with_score))
+    def seed_followers_by_sum_followed(self, sort_by_favorites=False):
+        with_score = self.seed_followers_by_sum_followed_with_score(
+            sort_by_favorites=sort_by_favorites
+        )
+        return list(map(
+            lambda f: f[0], with_score
+        ))
 
     def load_my_friends(self):
         query = '''
             select tu.user_id, tu.screen_name, tu.followers_count,
             tu.friends_count, tu.blob
+
             from twitter_user tu
+
             inner join my_friends mf on tu.user_id = mf.user_id
         '''
         results = self.db.cursor().execute(query).fetchall()
