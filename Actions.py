@@ -1,6 +1,6 @@
 import time
 
-from tweepy import TweepError
+from tweepy import TweepError, tweepy
 
 from Auth import tweepy_with_auth
 from Analyse import Analyse
@@ -42,17 +42,21 @@ class Actions:
 
     def destroy_all_favorites(self):
         # Dump already liked tweets
-        already_liked_tweets = tweepy_with_auth.favorites()
-        for liked_tweet in already_liked_tweets:
-            try:
-                print('Actions | unlike tweet by {0}'.format(
-                    liked_tweet.user.screen_name
-                ))
-                tweepy_with_auth.destroy_favorite(liked_tweet.id)
-            except TweepError as e:
-                print(e)
-            except Exception:
-                raise
+        cursor = tweepy.Cursor(
+            tweepy_with_auth.favorites,
+            count=TWITTER_FAVORITES_API_MAX_COUNT
+        )
+        for page in cursor.pages():
+            for liked_tweet in page:
+                try:
+                    print('Actions | unlike tweet by {0}'.format(
+                        liked_tweet.user.screen_name
+                    ))
+                    tweepy_with_auth.destroy_favorite(liked_tweet.id)
+                except TweepError as e:
+                    print(e)
+                except Exception:
+                    raise
 
     def gain_followers_like_strategy(self):
         """Gain followers by liking statuses of good candidates
