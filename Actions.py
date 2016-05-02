@@ -1,6 +1,6 @@
 import time
 
-from tweepy import TweepError, tweepy
+import tweepy
 
 from Auth import tweepy_with_auth
 from Analyse import Analyse
@@ -9,9 +9,10 @@ from TwackData import TwackData
 
 class Actions:
     TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS = 10
-    TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS = 100
-    NUMBER_TO_FOLLOW = 100
-    NUMBER_OF_TWEETS_TO_LIKE = 1000
+    TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS = 20
+    TWITTER_FAVORITES_API_MAX_COUNT = 200
+    NUMBER_TO_FOLLOW = 500
+    NUMBER_OF_TWEETS_TO_LIKE = 5000
 
     def __init__(self):
         self.twack_data = TwackData()
@@ -44,7 +45,7 @@ class Actions:
         # Dump already liked tweets
         cursor = tweepy.Cursor(
             tweepy_with_auth.favorites,
-            count=TWITTER_FAVORITES_API_MAX_COUNT
+            count=self.TWITTER_FAVORITES_API_MAX_COUNT
         )
         for page in cursor.pages():
             for liked_tweet in page:
@@ -53,7 +54,7 @@ class Actions:
                         liked_tweet.user.screen_name
                     ))
                     tweepy_with_auth.destroy_favorite(liked_tweet.id)
-                except TweepError as e:
+                except tweepy.TweepError as e:
                     print(e)
                 except Exception:
                     raise
@@ -88,26 +89,29 @@ class Actions:
 
                 # Find the 'best' by number of retweets and likes
                 best = self._get_best_tweet_to_like(tweets)
+                self.twack_data.add_favorite_attempt(
+                    best.user.id, best.id
+                )
+
                 # Skip this user if we already liked their best tweet
                 if best is None or best.id in already_liked_tweet_ids:
                     continue
+
                 print('Actions | like tweet by {0} - {1} rt {2} <3'.format(
                     best.user.screen_name, best.retweet_count, best.favorite_count
                 ))
 
                 # Like the tweet. Ignore tweepy errors, but not real ones
                 tweepy_with_auth.create_favorite(best.id)
-                self.twack_data.add_favorite_attempt(
-                    best.user.id, best.id
-                )
                 liked_tweet_count += 1
                 time.sleep(
                     self.TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS
                 )
-            except TweepError as e:
+            except tweepy.TweepError as e:
                 print(e)
             except Exception as e:
-                raise e
+                print(e)
+
 
             if liked_tweet_count > self.NUMBER_OF_TWEETS_TO_LIKE:
                 return
@@ -123,10 +127,11 @@ class Actions:
         my_friends_ids = {
             f.user_id for f in self.twack_data.load_my_friends()
         }
-        candidates = self.analyser.good_candidates_not_following_me()
-        candidates = filter(
-            candidates, lambda c: c.user_id not in my_friends_ids
-        )
+        candidates = list(filter(
+            lambda c: c.user_id not in my_friends_ids,
+            self.analyser.good_candidates_not_following_me()
+        ))
+
         successful_follow_count = 0
         for candidate in candidates:
             user_id = candidate.user_id
@@ -139,7 +144,7 @@ class Actions:
                     self.TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS
                 )
                 successful_follow_count += 1
-            except TweepError as e:
+            except tweepy.TweepError as e:
                 print(e)
             except Exception as e:
                 raise e

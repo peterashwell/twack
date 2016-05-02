@@ -24,7 +24,7 @@ class TwackData:
         query = '''
             insert into friend_attempt
             (user_id)
-            values (?, ?)
+            values (?)
         '''
 
         self.db.cursor().execute(
@@ -59,7 +59,6 @@ class TwackData:
 
             group by sf.user_id
             having seed_count > 1
-
         '''
         order_by = "order by seed_count desc"
         if sort_by_favorites:
