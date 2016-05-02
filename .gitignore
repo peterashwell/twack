@@ -3,3 +3,4 @@ __pycache__
 twackenv
 dump
 data/twack.db
+logs
