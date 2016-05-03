@@ -8,6 +8,7 @@ from TwackQueries import TwackQueries
 from TwackData import TwackData
 
 import logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -128,6 +129,20 @@ class Strategies:
             if liked_tweet_count > self.NUMBER_OF_TWEETS_TO_LIKE:
                 break
 
+    def _add_twack_user_as_friend(self, twack_user):
+        tweepy_with_auth.create_friendship(twack_user.user_id)
+        logger.info('following {0}'.format(twack_user.screen_name))
+        time.sleep(TwitterConstants.CREATE_FRIENDSHIP_API_SLEEP_SECONDS)
+
+    def _remove_twack_users_already_my_friends(self, twack_users):
+        my_friends_ids = {
+            f.user_id for f in self.twack_data.load_my_friends()
+        }
+        return list(filter(
+            lambda c: c.user_id not in my_friends_ids,
+            twack_users
+        ))
+
     def gain_followers_friends_strategy(self):
         """Gain followers by friending people who are likely to follow back
 
@@ -135,37 +150,26 @@ class Strategies:
         Do not follow people who are already my friends, and ignore errors.
         Keep going until the given limit (NUMBER_TO_FOLLOW) is reached.
         """
-        my_friends_ids = {
-            f.user_id for f in self.twack_data.load_my_friends()
-        }
-        candidates = list(filter(
-            lambda c: c.user_id not in my_friends_ids,
+        candidates = self._remove_twack_users_already_my_friends(
             self.analyser.candidates_last_friended_first()
-        ))
+        )
 
         successful_follow_count = 0
         for candidate in candidates:
-            user_id = candidate.user_id
-            screen_name = candidate.screen_name
-            self.twack_data.add_friend_attempt(user_id)
             try:
-                tweepy_with_auth.create_friendship(user_id)
-                logger.info('following {0}'.format(screen_name))
-                time.sleep(
-                    TwitterConstants.CREATE_FRIENDSHIP_API_SLEEP_SECONDS
-                )
+                self._add_twack_user_as_friend(candidate)
+                self.twack_data.add_friend_attempt(candidate.user_id)
                 successful_follow_count += 1
             except tweepy.TweepError:
+                self.twack_data.add_friend_attempt(candidate.user_id)
                 logger.exception('TweepError adding {0} as friend'.format(
-                    screen_name
+                    candidate.screen_name
                 ))
             except Exception:
                 logger.exception('Exception adding {0} as friend'.format(
-                    screen_name
+                    candidate.screen_name
                 ))
 
             if successful_follow_count > self.NUMBER_TO_FOLLOW:
-                logger.info('Reached limit of {0} in following people'.format(
-                    self.NUMBER_TO_FOLLOW
-                ))
-                sys.exit(0)
+                logger.info('Reached add friend limit')
+                break
