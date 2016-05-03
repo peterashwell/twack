@@ -2,8 +2,8 @@ import sys
 
 sys.stderr = sys.stdout
 
-from MyStatus import MyStatus
+from TwitterQueries import TwitterQueries
 
-status = MyStatus()
+status = TwitterQueries()
 status.dump_my_followers()
 status.dump_my_friends()

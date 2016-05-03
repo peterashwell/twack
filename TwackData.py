@@ -1,3 +1,5 @@
+import json
+
 import os
 import sqlite3
 
@@ -10,8 +12,19 @@ TwackTwitterUser = namedtuple(
 
 TwackTwitterUserWithMetadata = namedtuple(
     'TwackTwitterUser',
-    'user_id, screen_name, followers_count, friends_count, blob, favorite_count, friend_count'
+    'user_id, screen_name, followers_count, friends_count, blob,\
+    favorite_count, friend_count'
 )
+
+
+def tweepy_user_to_twack_user(user):
+    return TwackTwitterUser(
+        user.id_str,
+        user.screen_name,
+        user.followers_count,
+        user.friends_count,
+        json.dumps(user._json)
+    )
 
 
 class TwackData:
@@ -44,7 +57,9 @@ class TwackData:
         )
         self.db.commit()
 
-    def seed_followers_by_sum_followed_with_score(self, sort_by_favorites=False, sort_by_friends=False):
+    def seed_followers_by_sum_followed_with_score(self,
+                                                  sort_by_favorites=False,
+                                                  sort_by_friends=False):
         query = '''
             select tu.user_id, tu.screen_name, tu.followers_count,
             tu.friends_count, tu.blob,
@@ -81,7 +96,9 @@ class TwackData:
             packed_results.append((user, seed_count))
         return packed_results
 
-    def seed_followers_by_sum_followed(self, sort_by_favorites=False, sort_by_friends=False):
+    def seed_followers_by_sum_followed(self,
+                                       sort_by_favorites=False,
+                                       sort_by_friends=False):
         with_score = self.seed_followers_by_sum_followed_with_score(
             sort_by_favorites=sort_by_favorites,
             sort_by_friends=sort_by_friends

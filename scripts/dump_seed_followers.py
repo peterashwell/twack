@@ -1,8 +1,8 @@
-from MyStatus import MyStatus
+from TwitterQueries import TwitterQueries
 from TwackData import TwackData
 
 td = TwackData()
-status = MyStatus()
+status = TwitterQueries()
 
 # Delete currently known seed followers, then rebuild list
 td.delete_all_seed_followers()

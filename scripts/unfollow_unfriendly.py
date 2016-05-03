@@ -1,10 +1,10 @@
 # Go through list of all my friends
 # Unfriend those that do not follow me
 
-from MyStatus import MyStatus
+from TwitterQueries import TwitterQueries
 from TwitterApi import tweepy_with_auth
 
-status = MyStatus()
+status = TwitterQueries()
 unfriendly = status.find_unfriendly_friends()
 
 print('script:unfollow_unfriendly | Unfriending {0} friends'.format(len(unfriendly)))

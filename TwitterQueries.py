@@ -1,57 +1,92 @@
-from collections import namedtuple
-import glob
-import json
 import os
+import time
 
-from TwackData import TwackData
+import tweepy
 
-UserWithScore = namedtuple(
-    'FollowerWithScore', 'user, score'
-)
+from TwitterApi import tweepy_with_auth, TwitterConstants
+from Meta import seed_screen_names
+from TwackData import TwackData, tweepy_user_to_twack_user
 
 
 class TwitterQueries:
     def __init__(self):
-        self.klass = type(self).__name__
+        self.my_screen_name = os.environ['TWACK_MY_TWITTER_SCREEN_NAME']
+        self.my_followers_path = os.environ['TWACK_MY_FOLLOWER_IDS_PATH']
+        self.my_friends_path = os.environ['TWACK_MY_FRIEND_IDS_PATH']
+
         self.twack_data = TwackData()
 
-    def _filter_twack_users_already_following_me(self, twack_users):
-        my_follower_ids = {
-            f.user_id for f in self.twack_data.load_my_followers()
-        }
-        return list(filter(
-            lambda tu: tu.user_id not in my_follower_ids,
-            twack_users
-        ))
+    def dump_seed_followers(self):
+        for seed_screen_name in seed_screen_names:
+            cursor = tweepy.Cursor(
+                tweepy_with_auth.followers,
+                screen_name=seed_screen_name,
+                count=TwitterConstants.FOLLOWERS_API_MAX_COUNT
+            )
 
-    def good_candidates_not_following_me(self):
-        seed_followers = self.twack_data.seed_followers_by_sum_followed()
-        return self._filter_twack_users_already_following_me(seed_followers)
+            for page in cursor.pages():
+                for user in page:
+                    twack_twitter_user = tweepy_user_to_twack_user(user)
+                    self.twack_data.add_twack_twitter_user(twack_twitter_user)
+                    self.twack_data.add_follower_of_screen_name(
+                        twack_twitter_user, seed_screen_name
+                    )
+                time.sleep(
+                    TwitterConstants.FOLLOWERS_API_REQUEST_SPACING_SECONDS
+                )
 
-    def good_candidates_not_following_me_last_liked_first(self):
-        """Find good candidates and sort by like attempts first
+    def dump_my_followers(self):
+        self.twack_data.delete_all_my_followers()
 
-        So the next candidate will be the one whose tweets I have liked
-        equal least who has the most seed followers in their friends list.
-        """
-        seed_followers = self.twack_data.seed_followers_by_sum_followed(
-            sort_by_favorites=True
+        cursor = tweepy.Cursor(
+            tweepy_with_auth.followers,
+            screen_name=self.my_screen_name,
+            count=TwitterConstants.FOLLOWERS_API_MAX_COUNT
         )
-        return self._filter_twack_users_already_following_me(seed_followers)
+        for page in cursor.pages():
+            for user in page:
+                twack_twitter_user = tweepy_user_to_twack_user(user)
+                self.twack_data.add_twack_twitter_user(twack_twitter_user)
+                self.twack_data.add_my_follower(twack_twitter_user)
+            time.sleep(
+                TwitterConstants.FOLLOWERS_API_REQUEST_SPACING_SECONDS
+            )
 
-    def good_candidates_not_following_me_last_friended_first(self):
-        """Find good candidates in order of last friended by me first
+    def dump_my_friends(self):
+        self.twack_data.delete_all_my_friends()
 
-        After the number of friend attempts, order by seed follow count
-        """
-        seed_followers = self.twack_data.seed_followers_by_sum_followed(
-            sort_by_friends=True
+        cursor = tweepy.Cursor(
+            tweepy_with_auth.friends,
+            screen_name=self.my_screen_name,
+            count=TwitterConstants.FRIENDS_API_MAX_COUNT
         )
-        return self._filter_twack_users_already_following_me(seed_followers)
+        for page in cursor.pages():
+            for user in page:
+                twack_twitter_user = tweepy_user_to_twack_user(user)
+                self.twack_data.add_twack_twitter_user(twack_twitter_user)
+                self.twack_data.add_my_friend(twack_twitter_user)
+            time.sleep(
+                TwitterConstants.FRIENDS_API_REQUEST_SPACING_SECONDS
+            )
+
+    def find_unfriendly_friends(self):
+        my_followers = self.twack_data.load_my_followers()
+        my_friends = self.twack_data.load_my_friends()
+
+        my_followers_ids = {f.user_id for f in my_followers}
+        my_friends_ids = {f.user_id for f in my_friends}
+
+        unfriendly = my_friends_ids.difference(my_followers_ids)
+        return unfriendly
 
 if __name__ == '__main__':
-    a = TwitterQueries()
-    sorted_followers = a.good_candidates_not_following_me_last_liked_first()
-    print('total candidates:', len(sorted_followers))
-    for user in sorted_followers:
-        print('candidate: {0} {1}'.format( user.screen_name, user.favorite_count))
+    status = TwitterQueries()
+    tw = TwackData()
+
+    my_followers = tw.load_my_followers()
+    my_friends = tw.load_my_friends()
+    unfriendly = status.find_unfriendly_friends()
+
+    print('{0} friends, {1} followers, {2} unfriendlies'.format(
+        len(my_friends), len(my_followers), len(unfriendly)
+    ))
