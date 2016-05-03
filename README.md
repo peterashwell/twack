@@ -23,4 +23,6 @@ Uses python, tweepy for the mechanics of the algorithm.
 
 ## todo
 
- - [ ] automation: automate loop of unfriend / friend with alerts for failures
+ - [ ] automation: update list of friends / followers before running strategy
+ - [ ] automation: create cycle of friend + favorite -> update -> dump unfriendly + dump favorites -> restart
+ - [ ] strategy: expand seed list
