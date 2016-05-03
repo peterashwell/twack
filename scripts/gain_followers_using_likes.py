@@ -1,4 +1,4 @@
-from Actions import Actions
+from Strategies import Strategies
 
-a = Actions()
+a = Strategies()
 a.gain_followers_like_strategy()

@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Actions:
+class Strategies:
     TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS = 10
     TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS = 20
     TWITTER_FAVORITES_API_MAX_COUNT = 200
