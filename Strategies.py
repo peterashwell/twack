@@ -22,6 +22,12 @@ class Strategies:
         self.twack_data = TwackData()
         self.analyser = TwackQueries()
 
+    def _tweet_likability_score(self, tweet):
+        return (
+            tweet.retweet_count * self.TWEET_LIKABILITY_RETWEET_WEIGHT +
+            tweet.favorite_count * self.TWEET_LIKABILITY_FAVORITE_WEIGHT
+        )
+
     def _get_best_tweet_to_like(self, tweets):
         """Return the highest scoring tweet from tweets
 
@@ -30,15 +36,8 @@ class Strategies:
         if len(tweets) == 0:
             return None
 
-        def tweet_likability_score(tweet):
-            return (
-                tweet.retweet_count * self.TWEET_LIKABILITY_RETWEET_WEIGHT +
-                tweet.favorite_count * self.TWEET_LIKABILITY_FAVORITE_WEIGHT
-            )
-
-        # Sort the tweets, highest scores first
-        tweets.sort(key=tweet_likability_score, reverse=True)
-
+        # Return the most likeable tweet
+        tweets.sort(key=self.tweet_likability_score, reverse=True)
         return tweets[0]
 
     def destroy_all_favorites(self):
