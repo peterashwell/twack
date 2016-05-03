@@ -23,19 +23,4 @@ Uses python, tweepy for the mechanics of the algorithm.
 
 ## todo
 
- - [x] create seed list of big crypto guys
- - [x] dump list of all followers of seed list
- - [x] dump list of people already following me
- - [x] script: follow people in top of influencer list first
- - [x] script: unfriend people who aren't following me
- - [x] script: follow people at bottom of influencer list (follow-gluttons)
- - [x] dbify: add single twack user
- - [x] dbify: follower of screen name (single)
- - [x] strategy: change dump seed list to database for more flexible analysis
- - [x] strategy: use 'most seed members followed' first
- - [ ] dbify: using db to track when I try to add people
- - [ ] strategy: friend last tweet
  - [ ] automation: automate loop of unfriend / friend with alerts for failures
- - [ ] strategy: 'conservative', e.g. limit friend / follow ratio when adding loads
- - [ ] strategy: random selection of who to follow
- - [ ] strategy: last friended first
