@@ -27,8 +27,6 @@ class Strategies:
 
         Scores are points by: retweets 3 points, likes 1
         """
-
-
         if len(tweets) == 0:
             return None
 
@@ -52,16 +50,16 @@ class Strategies:
         for page in cursor.pages():
             for liked_tweet in page:
                 try:
-                    logger.info('Actions | unlike tweet by {0}'.format(
+                    logger.info('Unliked tweet by {0}'.format(
                         liked_tweet.user.screen_name
                     ))
                     tweepy_with_auth.destroy_favorite(liked_tweet.id)
-                except tweepy.TweepError as e:
-                    logger.exception('Encountered a tweepy error unliking tweet by {0}'.format(
+                except tweepy.TweepError:
+                    logger.exception('Had tweeperror unliking {0}'.format(
                         liked_tweet.user.screen_name
                     ))
                 except Exception:
-                    logger.exception('Encountered a problem unliking tweet by {0}'.format(
+                    logger.exception('Had exception unliking {0}'.format(
                         liked_tweet.user.screen_name
                     ))
 
@@ -97,8 +95,9 @@ class Strategies:
                 if best is None:
                     continue
 
-                logger.info('Actions | like tweet by {0} - {1} rt {2} <3'.format(
-                    best.user.screen_name, best.retweet_count, best.favorite_count
+                logger.info('like tweet by {0} - {1} rt {2} <3'.format(
+                    best.user.screen_name, best.retweet_count,
+                    best.favorite_count
                 ))
 
                 # Like the tweet. Ignore tweepy errors, but not real ones
@@ -112,16 +111,16 @@ class Strategies:
                     TwitterConstants.CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS
                 )
 
-            except tweepy.TweepError as e:
+            except tweepy.TweepError:
                 # Log as attempt with 'null' tweet id recorded as what we liked
                 self.twack_data.add_favorite_attempt(
                     c.user_id, -1
                 )
-                logger.exception('Encountered problem liking tweet by {0}'.format(
+                logger.exception('TweepError liking {0} tweet'.format(
                     c.screen_name
                 ))
-            except Exception as e:
-                logger.exception('Encountered problem liking tweet by {0}'.format(
+            except Exception:
+                logger.exception('Exception liking {0} tweet'.format(
                     c.screen_name
                 ))
 
@@ -155,12 +154,12 @@ class Strategies:
                     TwitterConstants.CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS
                 )
                 successful_follow_count += 1
-            except tweepy.TweepError as e:
-                logger.exception('Encountered problem adding {0} as friend'.format(
+            except tweepy.TweepError:
+                logger.exception('TweepError adding {0} as friend'.format(
                     screen_name
                 ))
-            except Exception as e:
-                logger.exception('Encountered problem adding {0} as friend'.format(
+            except Exception:
+                logger.exception('Exception adding {0} as friend'.format(
                     screen_name
                 ))
 
