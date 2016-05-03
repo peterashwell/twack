@@ -4,7 +4,11 @@ import time
 
 import tweepy
 
-from TwitterApi import tweepy_with_auth, TwitterConstants
+from TwitterApi import (
+    tweepy_with_auth,
+    tweepy_user_to_twack_user,
+    TwitterConstants
+)
 from Meta import seed_screen_names
 from TwackData import TwackTwitterUser, TwackData
 
@@ -17,15 +21,6 @@ class MyStatus:
 
         self.twack_data = TwackData()
 
-    def tweepy_user_to_twack_user(self, user):
-        return TwackTwitterUser(
-            user.id_str,
-            user.screen_name,
-            user.followers_count,
-            user.friends_count,
-            json.dumps(user._json)
-        )
-
     def dump_seed_followers(self):
         for seed_screen_name in seed_screen_names:
             cursor = tweepy.Cursor(
@@ -36,7 +31,7 @@ class MyStatus:
 
             for page in cursor.pages():
                 for user in page:
-                    twack_twitter_user = self.tweepy_user_to_twack_user(user)
+                    twack_twitter_user = tweepy_user_to_twack_user(user)
                     self.twack_data.add_twack_twitter_user(twack_twitter_user)
                     self.twack_data.add_follower_of_screen_name(
                         twack_twitter_user, seed_screen_name
@@ -55,7 +50,7 @@ class MyStatus:
         )
         for page in cursor.pages():
             for user in page:
-                twack_twitter_user = self.tweepy_user_to_twack_user(user)
+                twack_twitter_user = tweepy_user_to_twack_user(user)
                 self.twack_data.add_twack_twitter_user(twack_twitter_user)
                 self.twack_data.add_my_follower(twack_twitter_user)
             time.sleep(
@@ -72,7 +67,7 @@ class MyStatus:
         )
         for page in cursor.pages():
             for user in page:
-                twack_twitter_user = self.tweepy_user_to_twack_user(user)
+                twack_twitter_user = tweepy_user_to_twack_user(user)
                 self.twack_data.add_twack_twitter_user(twack_twitter_user)
                 self.twack_data.add_my_friend(twack_twitter_user)
             time.sleep(TwitterConstants.TWITTER_FRIENDS_API_REQUEST_SPACING_SECONDS)

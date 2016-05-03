@@ -1,6 +1,9 @@
+import json
 import os
 
 import tweepy
+
+from TwackData import TwackTwitterUser
 
 access_token = os.environ['TWACK_TWITTER_API_ACCESS_TOKEN']
 access_token_secret = os.environ['TWACK_TWITTER_API_ACCESS_TOKEN_SECRET']
@@ -12,6 +15,15 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 
 tweepy_with_auth = tweepy.API(auth)
+
+def tweepy_user_to_twack_user(self, user):
+    return TwackTwitterUser(
+        user.id_str,
+        user.screen_name,
+        user.followers_count,
+        user.friends_count,
+        json.dumps(user._json)
+    )
 
 
 class TwitterConstants:
