@@ -37,7 +37,7 @@ class Strategies:
             return None
 
         # Return the most likeable tweet
-        tweets.sort(key=self.tweet_likability_score, reverse=True)
+        tweets.sort(key=self._tweet_likability_score, reverse=True)
         return tweets[0]
 
     def destroy_all_favorites(self):
