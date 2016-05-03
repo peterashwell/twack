@@ -8,9 +8,9 @@ TwackTwitterUser = namedtuple(
     'user_id, screen_name, followers_count, friends_count, blob'
 )
 
-TwackTwitterUserWithFavoriteCount = namedtuple(
+TwackTwitterUserWithMetadata = namedtuple(
     'TwackTwitterUser',
-    'user_id, screen_name, followers_count, friends_count, blob, favorite_count'
+    'user_id, screen_name, followers_count, friends_count, blob, favorite_count, friend_count'
 )
 
 
@@ -44,18 +44,22 @@ class TwackData:
         )
         self.db.commit()
 
-    def seed_followers_by_sum_followed_with_score(self, sort_by_favorites=False):
+    def seed_followers_by_sum_followed_with_score(self, sort_by_favorites=False, sort_by_friends=False):
         query = '''
             select tu.user_id, tu.screen_name, tu.followers_count,
-            tu.friends_count, tu.blob, count(distinct fa.id) as favorite_count,
+            tu.friends_count, tu.blob,
+            count(distinct fav.id) as favorite_count,
+            count(distinct frnd.id) as friend_count,
             count(sf.follower_of_screen_name) as seed_count
 
             from seed_followers sf
 
             inner join twitter_user tu
             on tu.user_id = sf.user_id
-            left outer join favorite_attempt fa
-            on fa.user_id = tu.user_id
+            left outer join favorite_attempt fav
+            on fav.user_id = tu.user_id
+            left outer join friend_attempt as frnd
+            on frnd.user_id = tu.user_id
 
             group by sf.user_id
             having seed_count > 1
@@ -63,6 +67,8 @@ class TwackData:
         order_by = "order by seed_count desc"
         if sort_by_favorites:
             order_by = "order by favorite_count asc, seed_count desc"
+        if sort_by_friends:
+            order_by = "order by friend_count asc, seed_count desc"
 
         query += order_by
 
@@ -71,13 +77,14 @@ class TwackData:
         for r in results:
             user_slice = r[:-1]
             seed_count = r[-1]
-            user = TwackTwitterUserWithFavoriteCount._make(user_slice)
+            user = TwackTwitterUserWithMetadata._make(user_slice)
             packed_results.append((user, seed_count))
         return packed_results
 
-    def seed_followers_by_sum_followed(self, sort_by_favorites=False):
+    def seed_followers_by_sum_followed(self, sort_by_favorites=False, sort_by_friends=False):
         with_score = self.seed_followers_by_sum_followed_with_score(
-            sort_by_favorites=sort_by_favorites
+            sort_by_favorites=sort_by_favorites,
+            sort_by_friends=sort_by_friends
         )
         return list(map(
             lambda f: f[0], with_score
