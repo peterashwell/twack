@@ -1,10 +1,14 @@
 import time
+import sys
 
 import tweepy
 
 from Auth import tweepy_with_auth
 from Analyse import Analyse
 from TwackData import TwackData
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Actions:
@@ -50,14 +54,18 @@ class Actions:
         for page in cursor.pages():
             for liked_tweet in page:
                 try:
-                    print('Actions | unlike tweet by {0}'.format(
+                    logger.info('Actions | unlike tweet by {0}'.format(
                         liked_tweet.user.screen_name
                     ))
                     tweepy_with_auth.destroy_favorite(liked_tweet.id)
                 except tweepy.TweepError as e:
-                    print(e)
+                    logger.exception('Encountered a tweepy error unliking tweet by {0}'.format(
+                        liked_tweet.user.screen_name
+                    ))
                 except Exception:
-                    raise
+                    logger.exception('Encountered a problem unliking tweet by {0}'.format(
+                        liked_tweet.user.screen_name
+                    ))
 
     def gain_followers_like_strategy(self):
         """Gain followers by liking statuses of good candidates
@@ -89,33 +97,40 @@ class Actions:
 
                 # Find the 'best' by number of retweets and likes
                 best = self._get_best_tweet_to_like(tweets)
-                self.twack_data.add_favorite_attempt(
-                    best.user.id, best.id
-                )
 
                 # Skip this user if we already liked their best tweet
                 if best is None or best.id in already_liked_tweet_ids:
                     continue
 
-                print('Actions | like tweet by {0} - {1} rt {2} <3'.format(
+                logger.info('Actions | like tweet by {0} - {1} rt {2} <3'.format(
                     best.user.screen_name, best.retweet_count, best.favorite_count
                 ))
 
                 # Like the tweet. Ignore tweepy errors, but not real ones
                 tweepy_with_auth.create_favorite(best.id)
                 liked_tweet_count += 1
+
+                self.twack_data.add_favorite_attempt(
+                    c.user_id, best.id
+                )
                 time.sleep(
                     self.TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS
                 )
-            except tweepy.TweepError as e:
-                print(e)
-            except Exception as e:
-                print(e)
 
+            except tweepy.TweepError as e:
+                self.twack_data.add_favorite_attempt(
+                    c.user_id, -1
+                )
+                logger.exception('Encountered problem liking tweet by {0}'.format(
+                    c.screen_name
+                ))
+            except Exception as e:
+                logger.exception('Encountered problem liking tweet by {0}'.format(
+                    c.screen_name
+                ))
 
             if liked_tweet_count > self.NUMBER_OF_TWEETS_TO_LIKE:
                 return
-
 
     def gain_followers_friends_strategy(self):
         """Gain followers by friending people who are likely to follow back
@@ -129,26 +144,32 @@ class Actions:
         }
         candidates = list(filter(
             lambda c: c.user_id not in my_friends_ids,
-            self.analyser.good_candidates_not_following_me()
+            self.analyser.good_candidates_not_following_me_last_friended_first()
         ))
 
         successful_follow_count = 0
         for candidate in candidates:
             user_id = candidate.user_id
             screen_name = candidate.screen_name
+            self.twack_data.add_friend_attempt(user_id)
             try:
                 tweepy_with_auth.create_friendship(user_id)
-                self.twack_data.add_friend_attempt(user_id)
-                print('Actions | following {0}'.format(screen_name))
+                logger.info('following {0}'.format(screen_name))
                 time.sleep(
                     self.TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS
                 )
                 successful_follow_count += 1
             except tweepy.TweepError as e:
-                print(e)
+                logger.exception('Encountered problem adding {0} as friend'.format(
+                    screen_name
+                ))
             except Exception as e:
-                raise e
+                logger.exception('Encountered problem adding {0} as friend'.format(
+                    screen_name
+                ))
 
             if successful_follow_count > self.NUMBER_TO_FOLLOW:
-                print('Actions | reached limit')
-                break
+                logger.info('Reached limit of {0} in following people'.format(
+                    self.NUMBER_TO_FOLLOW
+                ))
+                sys.exit(0)
