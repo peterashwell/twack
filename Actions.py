@@ -34,14 +34,14 @@ class Actions:
         if len(tweets) == 0:
             return None
 
-        def tweet_likeability_score(tweet):
+        def tweet_likability_score(tweet):
             return (
                 tweet.retweet_count * RETWEET_WEIGHT +
                 tweet.favorite_count * FAVORITE_WEIGHT
             )
 
         # Sort the tweets, highest scores first
-        tweets.sort(key=tweet_likeability_score, reverse=True)
+        tweets.sort(key=tweet_likability_score, reverse=True)
 
         return tweets[0]
 
@@ -78,7 +78,7 @@ class Actions:
         Stop at NUMBER_TO_LIKE amount
         """
         self.destroy_all_favorites()
-        
+
         # Go through each candidate from people I'm not following
         candidates = self.analyser.good_candidates_not_following_me_last_liked_first()
         already_liked_tweet_ids = {
