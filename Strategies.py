@@ -62,6 +62,32 @@ class Strategies:
                         liked_tweet.user.screen_name
                     ))
 
+    def _like_users_best_tweet(self, twack_user):
+        # Get their tweets and ignore retweets
+        tweets = tweepy_with_auth.user_timeline(twack_user.user_id)
+        tweets = list(filter(
+            lambda t: not hasattr(t, 'retweeted_status'), tweets
+        ))
+
+        # Find the 'best' by number of retweets and likes
+        # Do nothing if they have no tweets
+        best = self._get_best_tweet_to_like(tweets)
+        if best is None:
+            return False
+
+        logger.info('like tweet by {0} - {1} rt {2} <3'.format(
+            best.user.screen_name, best.retweet_count,
+            best.favorite_count
+        ))
+
+        # Like the tweet. Ignore tweepy errors, but not real ones
+        tweepy_with_auth.create_favorite(best.id)
+        time.sleep(
+            TwitterConstants.CREATE_FAVORITE_API_SLEEP_SECONDS
+        )
+
+        return best.id
+
     def gain_followers_like_strategy(self):
         """Gain followers by liking statuses of good candidates
 
@@ -79,52 +105,28 @@ class Strategies:
 
         liked_tweet_count = 0
 
-        for c in candidates:
+        for twack_user in candidates:
             try:
-                # Get their tweets
-                tweets = tweepy_with_auth.user_timeline(c.user_id)
-                tweets = list(filter(
-                    lambda t: not hasattr(t, 'retweeted_status'), tweets
-                ))
-
-                # Find the 'best' by number of retweets and likes
-                best = self._get_best_tweet_to_like(tweets)
-
-                # Skip this user if we already liked their best tweet
-                if best is None:
-                    continue
-
-                logger.info('like tweet by {0} - {1} rt {2} <3'.format(
-                    best.user.screen_name, best.retweet_count,
-                    best.favorite_count
-                ))
-
-                # Like the tweet. Ignore tweepy errors, but not real ones
-                tweepy_with_auth.create_favorite(best.id)
+                liked_tweet_id = self._like_users_best_tweet(twack_user)
                 liked_tweet_count += 1
-
                 self.twack_data.add_favorite_attempt(
-                    c.user_id, best.id
+                    twack_user.user_id, liked_tweet_id
                 )
-                time.sleep(
-                    TwitterConstants.CREATE_FAVORITE_API_SLEEP_SECONDS
-                )
-
             except tweepy.TweepError:
                 # Log as attempt with 'null' tweet id recorded as what we liked
                 self.twack_data.add_favorite_attempt(
-                    c.user_id, -1
+                    twack_user.user_id, -1
                 )
                 logger.exception('TweepError liking {0} tweet'.format(
-                    c.screen_name
+                    twack_user.screen_name
                 ))
             except Exception:
                 logger.exception('Exception liking {0} tweet'.format(
-                    c.screen_name
+                    twack_user.screen_name
                 ))
 
             if liked_tweet_count > self.NUMBER_OF_TWEETS_TO_LIKE:
-                return
+                break
 
     def gain_followers_friends_strategy(self):
         """Gain followers by friending people who are likely to follow back
