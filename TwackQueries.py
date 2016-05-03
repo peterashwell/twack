@@ -1,13 +1,4 @@
-from collections import namedtuple
-import glob
-import json
-import os
-
 from TwackData import TwackData
-
-UserWithScore = namedtuple(
-    'FollowerWithScore', 'user, score'
-)
 
 
 class TwackQueries:
@@ -54,4 +45,6 @@ if __name__ == '__main__':
     sorted_followers = a.good_candidates_not_following_me_last_liked_first()
     print('total candidates:', len(sorted_followers))
     for user in sorted_followers:
-        print('candidate: {0} {1}'.format( user.screen_name, user.favorite_count))
+        print('candidate: {0} {1}'.format(
+            user.screen_name, user.favorite_count
+        ))
