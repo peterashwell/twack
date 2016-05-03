@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class Strategies:
-    NUMBER_TO_FOLLOW = 500
+    NUMBER_TO_FOLLOW = 5000
     NUMBER_OF_TWEETS_TO_LIKE = 5000
 
     TWEET_LIKABILITY_FAVORITE_WEIGHT = 1
