@@ -108,7 +108,7 @@ class Strategies:
                     c.user_id, best.id
                 )
                 time.sleep(
-                    TwitterConstants.CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS
+                    TwitterConstants.CREATE_FAVORITE_API_SLEEP_SECONDS
                 )
 
             except tweepy.TweepError:
@@ -151,7 +151,7 @@ class Strategies:
                 tweepy_with_auth.create_friendship(user_id)
                 logger.info('following {0}'.format(screen_name))
                 time.sleep(
-                    TwitterConstants.CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS
+                    TwitterConstants.CREATE_FRIENDSHIP_API_SLEEP_SECONDS
                 )
                 successful_follow_count += 1
             except tweepy.TweepError:

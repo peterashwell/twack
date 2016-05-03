@@ -27,7 +27,7 @@ class TwitterQueries:
                         twack_twitter_user, seed_screen_name
                     )
                 time.sleep(
-                    TwitterConstants.FOLLOWERS_API_REQUEST_SPACING_SECONDS
+                    TwitterConstants.FOLLOWERS_API_SLEEP_SECONDS
                 )
 
     def dump_my_followers(self):
@@ -45,7 +45,7 @@ class TwitterQueries:
                 twack_data.add_twack_twitter_user(twack_twitter_user)
                 twack_data.add_my_follower(twack_twitter_user)
             time.sleep(
-                TwitterConstants.FOLLOWERS_API_REQUEST_SPACING_SECONDS
+                TwitterConstants.FOLLOWERS_API_SLEEP_SECONDS
             )
 
     def dump_my_friends(self):
@@ -63,7 +63,7 @@ class TwitterQueries:
                 twack_data.add_twack_twitter_user(twack_twitter_user)
                 twack_data.add_my_friend(twack_twitter_user)
             time.sleep(
-                TwitterConstants.FRIENDS_API_REQUEST_SPACING_SECONDS
+                TwitterConstants.FRIENDS_API_SLEEP_SECONDS
             )
 
     def find_unfriendly_friends(self):
