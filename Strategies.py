@@ -3,7 +3,7 @@ import sys
 
 import tweepy
 
-from Auth import tweepy_with_auth
+from TwitterApi import tweepy_with_auth
 from Analyse import Analyse
 from TwackData import TwackData
 

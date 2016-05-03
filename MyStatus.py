@@ -4,16 +4,9 @@ import time
 
 import tweepy
 
-from Auth import tweepy_with_auth
+from TwitterApi import tweepy_with_auth, TwitterConstants
 from Meta import seed_screen_names
 from TwackData import TwackTwitterUser, TwackData
-
-TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS = 60
-TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS = 60
-TWITTER_FRIENDS_API_REQUEST_SPACING_SECONDS = 60
-
-TWITTER_FRIENDS_API_MAX_COUNT = 200
-TWITTER_FOLLOWERS_API_MAX_COUNT = 200
 
 
 class MyStatus:
@@ -38,7 +31,7 @@ class MyStatus:
             cursor = tweepy.Cursor(
                 tweepy_with_auth.followers,
                 screen_name=seed_screen_name,
-                count=TWITTER_FOLLOWERS_API_MAX_COUNT
+                count=TwitterConstants.TWITTER_FOLLOWERS_API_MAX_COUNT
             )
 
             for page in cursor.pages():
@@ -48,7 +41,9 @@ class MyStatus:
                     self.twack_data.add_follower_of_screen_name(
                         twack_twitter_user, seed_screen_name
                     )
-                time.sleep(TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS)
+                time.sleep(
+                    TwitterConstants.TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS
+                )
 
     def dump_my_followers(self):
         self.twack_data.delete_all_my_followers()
@@ -56,14 +51,16 @@ class MyStatus:
         cursor = tweepy.Cursor(
             tweepy_with_auth.followers,
             screen_name=self.my_screen_name,
-            count=TWITTER_FOLLOWERS_API_MAX_COUNT
+            count=TwitterConstants.TWITTER_FOLLOWERS_API_MAX_COUNT
         )
         for page in cursor.pages():
             for user in page:
                 twack_twitter_user = self.tweepy_user_to_twack_user(user)
                 self.twack_data.add_twack_twitter_user(twack_twitter_user)
                 self.twack_data.add_my_follower(twack_twitter_user)
-            time.sleep(TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS)
+            time.sleep(
+                TwitterConstants.TWITTER_FOLLOWERS_API_REQUEST_SPACING_SECONDS
+            )
 
     def dump_my_friends(self):
         self.twack_data.delete_all_my_friends()
@@ -71,14 +68,14 @@ class MyStatus:
         cursor = tweepy.Cursor(
             tweepy_with_auth.friends,
             screen_name=self.my_screen_name,
-            count=TWITTER_FRIENDS_API_MAX_COUNT
+            count=TwitterConstants.TWITTER_FRIENDS_API_MAX_COUNT
         )
         for page in cursor.pages():
             for user in page:
                 twack_twitter_user = self.tweepy_user_to_twack_user(user)
                 self.twack_data.add_twack_twitter_user(twack_twitter_user)
                 self.twack_data.add_my_friend(twack_twitter_user)
-            time.sleep(TWITTER_FRIENDS_API_REQUEST_SPACING_SECONDS)
+            time.sleep(TwitterConstants.TWITTER_FRIENDS_API_REQUEST_SPACING_SECONDS)
 
     def find_unfriendly_friends(self):
         my_followers = self.twack_data.load_my_followers()

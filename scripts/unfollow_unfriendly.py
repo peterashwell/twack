@@ -2,7 +2,7 @@
 # Unfriend those that do not follow me
 
 from MyStatus import MyStatus
-from Auth import tweepy_with_auth
+from TwitterApi import tweepy_with_auth
 
 status = MyStatus()
 unfriendly = status.find_unfriendly_friends()
