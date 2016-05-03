@@ -3,7 +3,7 @@ import sys
 
 import tweepy
 
-from TwitterApi import tweepy_with_auth
+from TwitterApi import tweepy_with_auth, TwitterConstants
 from TwackQueries import TwackQueries
 from TwackData import TwackData
 
@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class Strategies:
-    TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS = 10
-    TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS = 20
-    TWITTER_FAVORITES_API_MAX_COUNT = 200
     NUMBER_TO_FOLLOW = 500
     NUMBER_OF_TWEETS_TO_LIKE = 5000
+
+    TWEET_LIKABILITY_FAVORITE_WEIGHT = 1
+    TWEET_LIKABILITY_RETWEET_WEIGHT = 3
 
     def __init__(self):
         self.twack_data = TwackData()
@@ -28,16 +28,14 @@ class Strategies:
         Scores are points by: retweets 3 points, likes 1
         """
 
-        FAVORITE_WEIGHT = 1
-        RETWEET_WEIGHT = 3
 
         if len(tweets) == 0:
             return None
 
         def tweet_likability_score(tweet):
             return (
-                tweet.retweet_count * RETWEET_WEIGHT +
-                tweet.favorite_count * FAVORITE_WEIGHT
+                tweet.retweet_count * self.TWEET_LIKABILITY_RETWEET_WEIGHT +
+                tweet.favorite_count * self.TWEET_LIKABILITY_FAVORITE_WEIGHT
             )
 
         # Sort the tweets, highest scores first
@@ -49,7 +47,7 @@ class Strategies:
         # Dump already liked tweets
         cursor = tweepy.Cursor(
             tweepy_with_auth.favorites,
-            count=self.TWITTER_FAVORITES_API_MAX_COUNT
+            count=TwitterConstants.FAVORITES_API_MAX_COUNT
         )
         for page in cursor.pages():
             for liked_tweet in page:
@@ -75,15 +73,12 @@ class Strategies:
         The process is to take a candidate, get their tweets, choose the best
         tweet in the last 24 hours, or otherwise their last tweet, and like it.
 
-        Stop at NUMBER_TO_LIKE amount
+        Stop at amount specified by pre-determined constant
         """
         self.destroy_all_favorites()
 
         # Go through each candidate from people I'm not following
         candidates = self.analyser.good_candidates_not_following_me_last_liked_first()
-        already_liked_tweet_ids = {
-            t.id for t in tweepy_with_auth.favorites()
-        }
 
         liked_tweet_count = 0
 
@@ -99,7 +94,7 @@ class Strategies:
                 best = self._get_best_tweet_to_like(tweets)
 
                 # Skip this user if we already liked their best tweet
-                if best is None or best.id in already_liked_tweet_ids:
+                if best is None:
                     continue
 
                 logger.info('Actions | like tweet by {0} - {1} rt {2} <3'.format(
@@ -114,10 +109,11 @@ class Strategies:
                     c.user_id, best.id
                 )
                 time.sleep(
-                    self.TWITTER_CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS
+                    TwitterConstants.CREATE_FAVORITE_API_REQUEST_SPACING_SECONDS
                 )
 
             except tweepy.TweepError as e:
+                # Log as attempt with 'null' tweet id recorded as what we liked
                 self.twack_data.add_favorite_attempt(
                     c.user_id, -1
                 )
@@ -156,7 +152,7 @@ class Strategies:
                 tweepy_with_auth.create_friendship(user_id)
                 logger.info('following {0}'.format(screen_name))
                 time.sleep(
-                    self.TWITTER_CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS
+                    TwitterConstants.CREATE_FRIENDSHIP_API_REQUEST_SPACING_SECONDS
                 )
                 successful_follow_count += 1
             except tweepy.TweepError as e:
