@@ -10,7 +10,7 @@ UserWithScore = namedtuple(
 )
 
 
-class Analyse:
+class TwitterQueries:
     def __init__(self):
         self.klass = type(self).__name__
         self.twack_data = TwackData()
@@ -50,7 +50,7 @@ class Analyse:
         return self._filter_twack_users_already_following_me(seed_followers)
 
 if __name__ == '__main__':
-    a = Analyse()
+    a = TwitterQueries()
     sorted_followers = a.good_candidates_not_following_me_last_liked_first()
     print('total candidates:', len(sorted_followers))
     for user in sorted_followers:

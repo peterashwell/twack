@@ -4,7 +4,7 @@ import sys
 import tweepy
 
 from TwitterApi import tweepy_with_auth
-from Analyse import Analyse
+from TwitterQueries import TwitterQueries
 from TwackData import TwackData
 
 import logging
@@ -20,7 +20,7 @@ class Strategies:
 
     def __init__(self):
         self.twack_data = TwackData()
-        self.analyser = Analyse()
+        self.analyser = TwitterQueries()
 
     def _get_best_tweet_to_like(self, tweets):
         """Return the highest scoring tweet from tweets
