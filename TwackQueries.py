@@ -6,7 +6,7 @@ class TwackQueries:
         self.klass = type(self).__name__
         self.twack_data = TwackData()
 
-    def _filter_twack_users_already_following_me(self, twack_users):
+    def _remove_twack_users_already_following_me(self, twack_users):
         my_follower_ids = {
             f.user_id for f in self.twack_data.load_my_followers()
         }
@@ -15,11 +15,11 @@ class TwackQueries:
             twack_users
         ))
 
-    def good_candidates_not_following_me(self):
+    def candidates(self):
         seed_followers = self.twack_data.seed_followers_by_sum_followed()
-        return self._filter_twack_users_already_following_me(seed_followers)
+        return self._remove_twack_users_already_following_me(seed_followers)
 
-    def good_candidates_not_following_me_last_liked_first(self):
+    def candidates_last_liked_first(self):
         """Find good candidates and sort by like attempts first
 
         So the next candidate will be the one whose tweets I have liked
@@ -28,9 +28,9 @@ class TwackQueries:
         seed_followers = self.twack_data.seed_followers_by_sum_followed(
             sort_by_favorites=True
         )
-        return self._filter_twack_users_already_following_me(seed_followers)
+        return self._remove_twack_users_already_following_me(seed_followers)
 
-    def good_candidates_not_following_me_last_friended_first(self):
+    def candidates_last_friended_first(self):
         """Find good candidates in order of last friended by me first
 
         After the number of friend attempts, order by seed follow count
@@ -38,11 +38,11 @@ class TwackQueries:
         seed_followers = self.twack_data.seed_followers_by_sum_followed(
             sort_by_friends=True
         )
-        return self._filter_twack_users_already_following_me(seed_followers)
+        return self._remove_twack_users_already_following_me(seed_followers)
 
 if __name__ == '__main__':
     a = TwackQueries()
-    sorted_followers = a.good_candidates_not_following_me_last_liked_first()
+    sorted_followers = a.candidates_last_liked_first()
     print('total candidates:', len(sorted_followers))
     for user in sorted_followers:
         print('candidate: {0} {1}'.format(

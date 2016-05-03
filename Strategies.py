@@ -75,7 +75,7 @@ class Strategies:
         self.destroy_all_favorites()
 
         # Go through each candidate from people I'm not following
-        candidates = self.analyser.good_candidates_not_following_me_last_liked_first()
+        candidates = self.analyser.candidates_last_liked_first()
 
         liked_tweet_count = 0
 
@@ -138,7 +138,7 @@ class Strategies:
         }
         candidates = list(filter(
             lambda c: c.user_id not in my_friends_ids,
-            self.analyser.good_candidates_not_following_me_last_friended_first()
+            self.analyser.candidates_last_friended_first()
         ))
 
         successful_follow_count = 0
