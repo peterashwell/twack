@@ -99,8 +99,6 @@ class Strategies:
 
         Stop at amount specified by pre-determined constant
         """
-        self.destroy_all_favorites()
-
         # Go through each candidate from people I'm not following
         candidates = self.analyser.candidates_last_liked_first()
 
