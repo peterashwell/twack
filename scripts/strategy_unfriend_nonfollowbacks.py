@@ -1,8 +1,11 @@
-# Go through list of all my friends
-# Unfriend those that do not follow me
+
+import time
 
 from TwitterQueries import TwitterQueries
-from TwitterApi import tweepy_with_auth
+from TwitterApi import tweepy_with_auth, TwitterConstants
+
+# Go through list of all my friends
+# Unfriend those that do not follow me
 
 status = TwitterQueries()
 unfriendly = status.find_unfriendly_friends()
@@ -14,3 +17,4 @@ for user_id in unfriendly:
         user_id=user_id
     )
     print('removed friend:', user.screen_name)
+    time.sleep(TwitterConstants.CREATE_FRIENDSHIP_API_SLEEP_SECONDS)

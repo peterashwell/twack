@@ -6,6 +6,10 @@ from TwitterApi import tweepy_with_auth, TwitterConstants
 from Meta import Meta
 from TwackData import TwackData, tweepy_user_to_twack_user
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class TwitterQueries:
     def __init__(self):
@@ -13,21 +17,28 @@ class TwitterQueries:
 
     def dump_seed_followers(self):
         for seed_screen_name in Meta.seed_screen_names:
-            cursor = tweepy.Cursor(
-                tweepy_with_auth.followers,
-                screen_name=seed_screen_name,
-                count=TwitterConstants.FOLLOWERS_API_MAX_COUNT
-            )
+            try:
+                cursor = tweepy.Cursor(
+                    tweepy_with_auth.followers,
+                    screen_name=seed_screen_name,
+                    count=TwitterConstants.FOLLOWERS_API_MAX_COUNT
+                )
 
-            for page in cursor.pages():
-                for user in page:
-                    twack_twitter_user = tweepy_user_to_twack_user(user)
-                    self.twack_data.add_twack_twitter_user(twack_twitter_user)
-                    self.twack_data.add_follower_of_screen_name(
-                        twack_twitter_user, seed_screen_name
+                for page in cursor.pages():
+                    for user in page:
+                        twack_twitter_user = tweepy_user_to_twack_user(user)
+                        self.twack_data.add_twack_twitter_user(twack_twitter_user)
+                        self.twack_data.add_follower_of_screen_name(
+                            twack_twitter_user, seed_screen_name
+                        )
+                    time.sleep(
+                        TwitterConstants.FOLLOWERS_API_SLEEP_SECONDS
                     )
-                time.sleep(
-                    TwitterConstants.FOLLOWERS_API_SLEEP_SECONDS
+            except Exception:
+                logger.exception(
+                    'Had exception getting followers of {0}'.format(
+                        seed_screen_name
+                    )
                 )
 
     def dump_my_followers(self):
