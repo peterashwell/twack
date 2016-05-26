@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class Strategies:
-    NUMBER_TO_FOLLOW = 500
-    NUMBER_OF_TWEETS_TO_LIKE = 500
+    NUMBER_TO_FOLLOW = 100
+    NUMBER_OF_TWEETS_TO_LIKE = 100
 
     TWEET_LIKABILITY_FAVORITE_WEIGHT = 1
     TWEET_LIKABILITY_RETWEET_WEIGHT = 3
@@ -62,6 +62,7 @@ class Strategies:
                     logger.exception('Had exception unliking {0}'.format(
                         liked_tweet.user.screen_name
                     ))
+                time.sleep(TwitterConstants.CREATE_FAVORITE_API_SLEEP_SECONDS)
 
     def _like_users_best_tweet(self, twack_user):
         # Get their tweets and ignore retweets
